@@ -1,0 +1,307 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style></head><body><title>Clé de lecture</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Clé de lecture">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout: one narrow column like a music stand - stats, staff, keyboard, then settings and weak notes below */
+:root{
+  --paper:#f6f7f9; --card:#ffffff; --ink:#1b2130; --ink-soft:#5b6476; --line:#d9dde5;
+  --felt:#a8323a; --felt-soft:#f6e3e4; --ok:#2e7d4f; --ok-soft:#e1f2e8; --warn:#9a6a12; --warn-soft:#f8eed9;
+  --key-white:#fdfdfb; --key-black:#1d2029; --key-edge:#c9ced8;
+  --f-display:"Young Serif",Georgia,"Times New Roman",serif;
+  --f-body:"Figtree",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#12141a; --card:#1b1e26; --ink:#eceef3; --ink-soft:#9aa2b3; --line:#2e3340;
+  --felt:#e0646c; --felt-soft:#3a1f23; --ok:#5cc489; --ok-soft:#173326; --warn:#e2b45a; --warn-soft:#352a14;
+  --key-white:#e9e9e4; --key-black:#0b0c10; --key-edge:#3a3f4c; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#12141a; --card:#1b1e26; --ink:#eceef3; --ink-soft:#9aa2b3; --line:#2e3340;
+  --felt:#e0646c; --felt-soft:#3a1f23; --ok:#5cc489; --ok-soft:#173326; --warn:#e2b45a; --warn-soft:#352a14;
+  --key-white:#e9e9e4; --key-black:#0b0c10; --key-edge:#3a3f4c; color-scheme:dark }
+html,body{background:var(--paper)}
+body{color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 32px}
+.wrap{max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+h1{font-family:var(--f-display);font-weight:400;font-size:24px;margin:0;letter-spacing:.2px}
+.felt{height:3px;background:var(--felt);border-radius:2px;width:48px;margin-top:4px}
+.status{font-size:12px;color:var(--ink-soft);text-align:right}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.stat span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-soft)}
+.stat b{font-weight:600;font-size:20px;font-variant-numeric:tabular-nums}
+.staff{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px 4px 2px}
+.staff svg{display:block;width:100%;height:auto}
+.feedback{min-height:24px;text-align:center;font-weight:500;font-size:15px;padding:0 8px 8px;font-variant-numeric:tabular-nums}
+.feedback.ok{color:var(--ok)} .feedback.ko{color:var(--felt)} .feedback.idle{color:var(--ink-soft)}
+.kb{position:relative;height:132px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.kb .whites{display:flex;height:100%;gap:3px}
+.kb button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.w{flex:1;background:var(--key-white);border:1px solid var(--key-edge);border-radius:0 0 8px 8px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;color:#5b6476;font-size:13px}
+.b{position:absolute;top:0;width:9.5%;height:58%;background:var(--key-black);border:0;border-radius:0 0 5px 5px}
+.w.hit-ok{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.w.hit-ko,.b.hit-ko{background:var(--felt-soft);border:1px solid var(--felt)}
+.w.show{background:var(--ok-soft);border-color:var(--ok)}
+.w:active{transform:translateY(1px)}
+.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px}
+.modes button{font:inherit;font-size:13px;font-weight:500;border:0;background:transparent;color:var(--ink-soft);padding:9px 4px;border-radius:9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.modes button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.modes small{font-size:11px;font-weight:400;opacity:.85}
+.note-msg{font-size:13px;color:var(--ink-soft);margin:0}
+.note-msg.err{color:var(--felt)}
+.meter{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--ok);transition:width .08s}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{font:inherit;font-size:13px;border:0;background:transparent;color:var(--ink);padding:6px 11px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+label.tg{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}
+label.tg input{width:18px;height:18px;accent-color:var(--felt)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:13px;padding:4px 9px;border-radius:7px;font-variant-numeric:tabular-nums}
+.chip.bad{background:var(--felt-soft);color:var(--felt)} .chip.mid{background:var(--warn-soft);color:var(--warn)}
+.muted{color:var(--ink-soft);font-size:13px;margin:0}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:transparent;color:var(--ink);padding:6px 12px;border-radius:8px;cursor:pointer}
+.btn.danger{color:var(--felt);border-color:var(--felt)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--felt);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div><h1>Clé de lecture</h1><div class="felt"></div></div>
+    <div class="status" id="status">Clavier écran</div>
+  </header>
+
+  <div class="stats" aria-live="polite">
+    <div class="stat"><span>Réussite</span><b id="sScore">0/0</b></div>
+    <div class="stat"><span>Temps moyen</span><b id="sTime">-</b></div>
+    <div class="stat"><span>Série</span><b id="sStreak">0</b></div>
+  </div>
+
+  <div class="staff">
+    <svg id="staff" viewBox="0 0 340 226" role="img" aria-label="Note à lire sur la double portée"></svg>
+    <div class="feedback idle" id="fb" aria-live="polite">Joue la note affichée</div>
+  </div>
+
+  <div class="kb" id="kb" aria-label="Clavier">
+    <div class="whites" id="whites"></div>
+  </div>
+
+  <div class="modes" role="group" aria-label="Mode de réponse">
+    <button id="mKeys" aria-pressed="true">Clavier écran<small>tactile</small></button>
+    <button id="mMic" aria-pressed="false">Micro<small>écoute le piano</small></button>
+    <button id="mMidi" aria-pressed="false">MIDI<small>FP-90X</small></button>
+  </div>
+  <div class="meter" id="meter" hidden><i id="meterBar"></i></div>
+  <p class="note-msg" id="modeMsg" hidden></p>
+
+  <section>
+    <h2>Notes à retravailler</h2>
+    <div class="chips" id="weak"></div>
+  </section>
+
+  <section>
+    <h2>Réglages</h2>
+    <div class="row"><span>Clé</span>
+      <div class="seg" role="group" aria-label="Clé">
+        <button data-clef="sol" aria-pressed="false">Sol</button>
+        <button data-clef="fa" aria-pressed="false">Fa</button>
+        <button data-clef="both" aria-pressed="true">Les deux</button>
+      </div>
+    </div>
+    <label class="tg"><input type="checkbox" id="optLedger"> Lignes supplémentaires</label>
+    <label class="tg"><input type="checkbox" id="optOctave"> Octave exacte (micro et MIDI)</label>
+    <label class="tg"><input type="checkbox" id="optNames" checked> Noms sur le clavier écran</label>
+    <div class="row">
+      <p class="muted" id="totalInfo"></p>
+      <span id="resetZone"><button class="btn danger" id="reset">Remettre à zéro</button></span>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+const GCLEF="M314 801Q300 854 291.0 906.0Q282 958 282 1012Q282 1059 288.5 1100.5Q295 1142 307 1177Q320 1217 341.0 1252.5Q362 1288 385.5 1311.0Q409 1334 427 1334Q451 1334 493 1249Q514 1206 524.0 1156.0Q534 1106 534 1049Q534 978 515.0 907.5Q496 837 459.5 775.0Q423 713 372 666L407 498Q422 500 432.0 501.0Q442 502 447 502Q508 502 556.0 467.5Q604 433 632.5 377.0Q661 321 661 254Q661 177 621.5 115.5Q582 54 503 25Q508 8 532 -117Q538 -147 541.0 -164.5Q544 -182 545.0 -195.0Q546 -208 546 -225Q546 -275 521.5 -314.5Q497 -354 455.5 -376.0Q414 -398 363 -398Q311 -398 271.0 -378.5Q231 -359 208.0 -324.5Q185 -290 185 -245Q185 -197 211.5 -165.0Q238 -133 287 -133Q329 -133 355.5 -163.5Q382 -194 382 -236Q382 -272 357.0 -299.0Q332 -326 292 -326H282Q308 -365 364 -365Q433 -365 472.0 -320.0Q511 -275 511 -205Q511 -188 507.0 -159.5Q503 -131 493 -91Q483 -51 477.5 -25.0Q472 1 470 12Q436 2 390 2Q304 2 222 52Q142 102 96.0 184.0Q50 266 50 361Q50 451 91 530Q132 609 192.5 675.0Q253 741 314 801ZM341 826Q364 838 390.0 870.5Q416 903 440.0 945.0Q464 987 479.0 1029.5Q494 1072 494 1106Q494 1142 483.0 1163.0Q472 1184 445 1184Q421 1184 398.5 1162.0Q376 1140 358.5 1103.5Q341 1067 331.0 1022.0Q321 977 321 930Q321 898 327.5 872.0Q334 846 341 826ZM398 379Q371 373 347.0 353.5Q323 334 308.5 306.5Q294 279 294 248Q294 223 307.0 196.5Q320 170 339 154Q352 142 365 136Q380 129 380 123Q380 120 370 117Q332 126 301.5 151.0Q271 176 253.5 211.5Q236 247 236 287Q236 330 253.5 370.0Q271 410 302.5 442.0Q334 474 374 490L345 641Q229 547 174.5 456.5Q120 366 120 277Q120 212 154.0 156.0Q188 100 247.0 65.5Q306 31 380 31Q400 31 420.5 35.0Q441 39 464 45ZM495 55Q593 97 593 227Q593 270 571.0 305.5Q549 341 512.0 362.0Q475 383 429 383Z", FCLEF="M50 123Q216 231 288 301Q336 348 373.0 408.5Q410 469 431.5 536.0Q453 603 453 669Q453 728 435.0 773.5Q417 819 383.0 845.0Q349 871 302 871Q284 871 264.5 867.0Q245 863 224 855Q181 839 158.0 813.5Q135 788 135 765Q135 756 143.0 752.0Q151 748 158 748Q168 748 183 752Q190 754 196.5 755.0Q203 756 210 756Q248 756 272.0 733.5Q296 711 296 674Q296 638 266.0 612.0Q236 586 195 586Q146 586 111.0 617.0Q76 648 76 697Q76 756 109.0 802.0Q142 848 198.5 874.0Q255 900 324 900Q400 900 460.0 867.0Q520 834 555.5 776.5Q591 719 591 646Q591 551 538 464Q511 419 476.5 379.0Q442 339 389.0 297.5Q336 256 256.0 208.0Q176 160 57 101ZM687 809Q710 809 726.0 793.0Q742 777 742 754Q742 731 726.0 715.5Q710 700 687 700Q664 700 648.0 715.5Q632 731 632 754Q632 777 648.0 793.0Q664 809 687 809ZM687 589Q710 589 726.0 573.0Q742 557 742 534Q742 511 726.0 495.5Q710 480 687 480Q664 480 648.0 495.5Q632 511 632 534Q632 557 648.0 573.0Q664 589 687 589Z";
+const NAMES=["Do","Ré","Mi","Fa","Sol","La","Si"], OFF=[0,2,4,5,7,9,11];
+const PC_NAMES=["Do","Do♯","Ré","Ré♯","Mi","Fa","Fa♯","Sol","Sol♯","La","La♯","Si"];
+const RANGES={sol:{base:[29,39],ledger:[26,42]},fa:{base:[17,27],ledger:[14,30]}};
+const K=12/244, NX=205;
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+let settings=Object.assign({clef:"both",ledger:false,octave:false,names:true},store.get("cdl-settings",{}));
+let stats=store.get("cdl-stats",{});
+let session={ok:0,n:0,t:0,c:0,streak:0};
+let cur=null, shownAt=0, locked=false, mode="keys";
+
+const dName=d=>NAMES[d%7]+(Math.floor(d/7)-1);
+const dMidi=d=>12*(Math.floor(d/7)+1)+OFF[d%7];
+function yOf(clef,d){return clef==="sol"?40+(38-d)*6:136+(26-d)*6}
+
+function pool(){
+  const out=[]; const cl=settings.clef==="both"?["sol","fa"]:[settings.clef];
+  cl.forEach(c=>{const r=RANGES[c][settings.ledger?"ledger":"base"];for(let d=r[0];d<=r[1];d++)out.push({clef:c,d})});
+  return out;
+}
+function key(n){return n.clef+n.d}
+function weight(n){
+  const s=stats[key(n)]; if(!s||s.n<2) return 2.5;
+  const err=(s.n-s.ok)/s.n, avg=s.ok?s.t/s.ok:4;
+  return 0.6+err*5+Math.max(0,avg-1.2)*1.2;
+}
+function pick(){
+  const p=pool().filter(n=>!cur||key(n)!==key(cur));
+  const w=p.map(weight), tot=w.reduce((a,b)=>a+b,0); let r=Math.random()*tot;
+  for(let i=0;i<p.length;i++){r-=w[i];if(r<=0)return p[i]}
+  return p[p.length-1];
+}
+
+function drawStaff(){
+  let s='';
+  for(let i=0;i<5;i++){s+=`<line x1="8" x2="334" y1="${40+i*12}" y2="${40+i*12}" />`;s+=`<line x1="8" x2="334" y1="${136+i*12}" y2="${136+i*12}" />`}
+  s=`<g stroke="var(--ink-soft)" stroke-width="1">${s}<line x1="8" x2="8" y1="40" y2="184"/><line x1="334" x2="334" y1="40" y2="88"/><line x1="334" x2="334" y1="136" y2="184"/></g>`;
+  s+=`<path d="M5 40 Q-1 40 -1 52 L-1 104 Q-1 112 -5 112 Q-1 112 -1 120 L-1 172 Q-1 184 5 184" fill="none" stroke="var(--ink)" stroke-width="2.4" transform="translate(4 0)"/>`;
+  s+=`<g fill="var(--ink)"><path transform="translate(14 ${88+12*K}) scale(${K} ${-K})" d="${GCLEF}"/><path transform="translate(14 ${184+12*K}) scale(${K} ${-K})" d="${FCLEF}"/></g>`;
+  if(cur){
+    const y=yOf(cur.clef,cur.d), d=cur.d; let led='';
+    if(cur.clef==="sol"){for(let l=28;l>=d;l-=2)led+=ledger(yOf("sol",l));for(let l=40;l<=d;l+=2)led+=ledger(yOf("sol",l))}
+    else{for(let l=16;l>=d;l-=2)led+=ledger(yOf("fa",l));for(let l=28;l<=d;l+=2)led+=ledger(yOf("fa",l))}
+    const mid=cur.clef==="sol"?34:22, down=d>=mid;
+    const stem=down?`<line x1="${NX-6.6}" x2="${NX-6.6}" y1="${y+1}" y2="${y+36}"/>`:`<line x1="${NX+6.6}" x2="${NX+6.6}" y1="${y-1}" y2="${y-36}"/>`;
+    s+=`<g stroke="var(--ink)" stroke-width="1.4">${led}${stem}</g><ellipse cx="${NX}" cy="${y}" rx="7.6" ry="5.4" transform="rotate(-22 ${NX} ${y})" fill="var(--ink)" id="head"/>`;
+  }
+  $("staff").innerHTML=s;
+}
+function ledger(y){return `<line x1="${NX-14}" x2="${NX+14}" y1="${y}" y2="${y}"/>`}
+
+function next(){
+  cur=pick(); locked=false; drawStaff(); shownAt=performance.now();
+  document.querySelectorAll(".w,.b").forEach(k=>k.classList.remove("hit-ok","hit-ko","show"));
+}
+
+function answer(midi,exact){
+  if(!cur||locked) return;
+  const target=dMidi(cur.d);
+  const good=(exact&&settings.octave)?midi===target:((midi-target)%12+12)%12===0;
+  const dt=Math.min(10,(performance.now()-shownAt)/1000);
+  const k=key(cur), s=stats[k]||(stats[k]={n:0,ok:0,t:0});
+  s.n++; session.n++; locked=true;
+  if(good){s.ok++;s.t+=dt;session.ok++;session.t+=dt;session.c++;session.streak++;
+    fb("ok",`${dName(cur.d)} - ${dt.toFixed(1).replace(".",",")} s`); mark(midi,"hit-ok"); setTimeout(next,450);
+  }else{session.streak=0;
+    const played=exact?PC_NAMES[midi%12]+(Math.floor(midi/12)-2):PC_NAMES[((midi%12)+12)%12];
+    fb("ko",`Tu as joué ${played} - c'était ${dName(cur.d)}`); mark(midi,"hit-ko"); showKey(target); setTimeout(next,1500);
+  }
+  store.set("cdl-stats",stats); renderStats();
+}
+function fb(c,t){const e=$("fb");e.className="feedback "+c;e.textContent=t}
+function mark(midi,cls){const el=document.querySelector(`[data-pc="${((midi%12)+12)%12}"]`);if(el)el.classList.add(cls)}
+function showKey(midi){const el=document.querySelector(`.w[data-pc="${midi%12}"]`);if(el)el.classList.add("show")}
+
+function renderStats(){
+  $("sScore").textContent=`${session.ok}/${session.n}`;
+  $("sTime").textContent=session.c?(session.t/session.c).toFixed(1).replace(".",",")+" s":"-";
+  $("sStreak").textContent=session.streak;
+  const rows=Object.entries(stats).filter(([,s])=>s.n>=2).map(([k,s])=>{
+    const clef=k.startsWith("sol")?"sol":"fa", d=+k.slice(clef.length), err=s.n-s.ok, avg=s.ok?s.t/s.ok:null;
+    return {d,clef,err,avg,score:(err/s.n)*5+(avg??4)}}).filter(r=>r.err>0||r.avg>1.6).sort((a,b)=>b.score-a.score).slice(0,6);
+  const w=$("weak");
+  w.innerHTML=rows.length?rows.map(r=>`<span class="chip ${r.score>3.2?"bad":"mid"}">${dName(r.d)} <small>clé de ${r.clef}</small> ·${r.avg?r.avg.toFixed(1).replace(".",",")+" s":"-"}${r.err?` · ${r.err} err.`:""}</span>`).join(""):`<p class="muted">Rien à signaler pour l'instant. Les notes lentes ou ratées apparaîtront ici et reviendront plus souvent.</p>`;
+  const tot=Object.values(stats).reduce((a,s)=>a+s.n,0);
+  $("totalInfo").textContent=tot?`${tot} note${tot>1?"s":""} jouée${tot>1?"s":""} au total`:"Aucun historique";
+}
+
+function buildKeys(){
+  const wh=$("whites"), kb=$("kb"); wh.innerHTML="";
+  NAMES.forEach((n,i)=>{const b=document.createElement("button");b.className="w";b.dataset.pc=OFF[i];b.textContent=settings.names?n:"";b.setAttribute("aria-label",n);
+    b.addEventListener("pointerdown",e=>{e.preventDefault();answer(60+OFF[i],false)});wh.appendChild(b)});
+  kb.querySelectorAll(".b").forEach(b=>b.remove());
+  [[1,1],[3,2],[6,4],[8,5],[10,6]].forEach(([pc,pos])=>{const b=document.createElement("button");b.className="b";b.dataset.pc=pc;b.style.left=`calc(${pos/7*100}% - 4.75%)`;b.setAttribute("aria-label",PC_NAMES[pc]);
+    b.addEventListener("pointerdown",e=>{e.preventDefault();answer(60+pc,false)});kb.appendChild(b)});
+}
+
+function setMode(m){
+  mode=m; ["keys","mic","midi"].forEach(x=>$("m"+x[0].toUpperCase()+x.slice(1)).setAttribute("aria-pressed",x===m));
+  $("kb").hidden=m!=="keys"; $("meter").hidden=m!=="mic";
+  if(m!=="mic") stopMic();
+  $("status").textContent={keys:"Clavier écran",mic:"Micro",midi:"MIDI"}[m];
+}
+function msg(t,err){const e=$("modeMsg");e.hidden=!t;e.textContent=t||"";e.classList.toggle("err",!!err)}
+
+let midiAccess=null;
+async function startMidi(){
+  setMode("midi");
+  if(!navigator.requestMIDIAccess){msg("Ce navigateur ne gère pas le MIDI. Sur iPhone, ouvre l'appli dans Web MIDI Browser. Sur Mac, utilise Chrome.",true);return}
+  try{
+    midiAccess=midiAccess||await navigator.requestMIDIAccess();
+    const hook=()=>{let names=[];midiAccess.inputs.forEach(inp=>{inp.onmidimessage=onMidi;names.push(inp.name)});
+      msg(names.length?"Connecté : "+names.join(", "):"Aucun clavier détecté. Branche le FP-90X en USB ou active son Bluetooth MIDI.",!names.length)};
+    midiAccess.onstatechange=hook; hook();
+  }catch(e){msg("Accès MIDI refusé dans cette vue. Utilise la version installée de l'appli.",true)}
+}
+function onMidi(e){const [st,n,v]=e.data;if((st&0xf0)===0x90&&v>0)answer(n,true)}
+
+let ac=null, stream=null, raf=0, buf=null, analyser=null, stable={m:-1,c:0}, gate=false, lastRun=0;
+async function startMic(){
+  setMode("mic");
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){msg("Micro indisponible dans ce navigateur.",true);return}
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+    ac=new (window.AudioContext||window.webkitAudioContext)(); await ac.resume();
+    const src=ac.createMediaStreamSource(stream); analyser=ac.createAnalyser(); analyser.fftSize=2048; src.connect(analyser);
+    buf=new Float32Array(analyser.fftSize); msg("J'écoute. Joue une note à la fois, bien détachée.");
+    loop();
+  }catch(e){msg("Accès au micro refusé ici. Dans l'appli installée, autorise le micro quand Safari le demande.",true)}
+}
+function stopMic(){cancelAnimationFrame(raf);if(stream)stream.getTracks().forEach(t=>t.stop());if(ac)ac.close();stream=null;ac=null}
+function loop(){
+  raf=requestAnimationFrame(loop);
+  const now=performance.now(); if(now-lastRun<35) return; lastRun=now;
+  analyser.getFloatTimeDomainData(buf);
+  let rms=0;for(let i=0;i<buf.length;i++)rms+=buf[i]*buf[i];rms=Math.sqrt(rms/buf.length);
+  $("meterBar").style.width=Math.min(100,rms*600)+"%";
+  if(rms<0.008){gate=false;stable.c=0;return}
+  if(gate||locked) return;
+  const f=yin(buf,ac.sampleRate); if(!f) return;
+  const m=Math.round(69+12*Math.log2(f/440));
+  if(m===stable.m)stable.c++;else{stable.m=m;stable.c=1}
+  if(stable.c>=3){gate=true;stable.c=0;answer(m,true)}
+}
+function yin(x,sr){
+  const minT=Math.floor(sr/1100), maxT=Math.floor(sr/60), W=x.length-maxT;
+  const d=new Float32Array(maxT+1); let run=0;
+  for(let t=1;t<=maxT;t++){let s=0;for(let j=0;j<W;j++){const v=x[j]-x[j+t];s+=v*v}run+=s;d[t]=run?s*t/run:1}
+  for(let t=minT;t<maxT;t++){if(d[t]<0.12){while(t+1<maxT&&d[t+1]<d[t])t++;
+    const a=d[t-1],b=d[t],c=d[t+1],den=a-2*b+c,sh=den?(a-c)/(2*den):0;return sr/(t+sh)}}
+  return 0;
+}
+
+$("mKeys").onclick=()=>{setMode("keys");msg("")};
+$("mMic").onclick=startMic; $("mMidi").onclick=startMidi;
+document.querySelectorAll("[data-clef]").forEach(b=>{b.onclick=()=>{settings.clef=b.dataset.clef;save();next()}});
+$("optLedger").onchange=e=>{settings.ledger=e.target.checked;save();next()};
+$("optOctave").onchange=e=>{settings.octave=e.target.checked;save()};
+$("optNames").onchange=e=>{settings.names=e.target.checked;save();buildKeys()};
+function restoreReset(){$("resetZone").innerHTML=`<button class="btn danger" id="reset">Remettre à zéro</button>`;bindReset()}
+function bindReset(){$("reset").onclick=()=>{const z=$("resetZone");z.innerHTML=`<button class="btn danger" id="rYes">Effacer l'historique</button> <button class="btn" id="rNo">Annuler</button>`;
+  $("rYes").onclick=()=>{stats={};session={ok:0,n:0,t:0,c:0,streak:0};store.set("cdl-stats",stats);restoreReset();renderStats()};$("rNo").onclick=restoreReset}}
+function save(){store.set("cdl-settings",settings);syncUI()}
+function syncUI(){document.querySelectorAll("[data-clef]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.clef===settings.clef));
+  $("optLedger").checked=settings.ledger;$("optOctave").checked=settings.octave;$("optNames").checked=settings.names}
+
+try{navigator.wakeLock&&navigator.wakeLock.request("screen").catch(()=>{})}catch(e){}
+bindReset(); syncUI(); buildKeys(); renderStats(); next();
+})();
+</script>
+</body></html>
